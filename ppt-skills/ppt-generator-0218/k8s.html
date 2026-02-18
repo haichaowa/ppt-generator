@@ -1,0 +1,1645 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>k8s</title>
+    <style>
+
+    /* CSS Variables */
+    :root {
+        --primary-color: #00f5ff;
+        --secondary-color: #bf00ff;
+        --background-color: #0a0a1a;
+        --text-color: #ffffff;
+        --accent-color: #ff006e;
+        --code-bg: rgba(0, 245, 255, 0.05);
+        --table-bg: rgba(0, 245, 255, 0.05);
+        --glass-bg: rgba(255, 255, 255, 0.05);
+        --glass-border: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Reset & Base */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+        background: var(--background-color);
+        color: var(--text-color);
+        overflow: hidden;
+        min-height: 100vh;
+    }
+
+    /* Animated Background */
+    .background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        overflow: hidden;
+    }
+
+    .orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.5;
+        animation: float 20s infinite ease-in-out;
+    }
+
+    .orb-1 {
+        width: 600px;
+        height: 600px;
+        background: var(--primary-color);
+        top: -200px;
+        left: -200px;
+        animation-delay: 0s;
+    }
+
+    .orb-2 {
+        width: 500px;
+        height: 500px;
+        background: var(--secondary-color);
+        bottom: -150px;
+        right: -150px;
+        animation-delay: -5s;
+    }
+
+    .orb-3 {
+        width: 400px;
+        height: 400px;
+        background: var(--accent-color);
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation-delay: -10s;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        25% { transform: translate(50px, -50px) scale(1.1); }
+        50% { transform: translate(-30px, 30px) scale(0.9); }
+        75% { transform: translate(-50px, -30px) scale(1.05); }
+    }
+
+    /* Slide Container */
+    .slides-container {
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        pointer-events: none;
+    }
+
+    .slide.active {
+        opacity: 1;
+        transform: translateX(0);
+        pointer-events: auto;
+    }
+
+    .slide.prev {
+        transform: translateX(-100%);
+    }
+
+    .slide-content {
+        width: 90%;
+        max-width: 1200px;
+        padding: 40px;
+    }
+
+    /* Neon Text Effect */
+    .neon-text {
+        color: var(--neon-color, var(--primary-color));
+        text-shadow:
+            0 0 10px var(--neon-color, var(--primary-color)),
+            0 0 20px var(--neon-color, var(--primary-color)),
+            0 0 40px var(--neon-color, var(--primary-color)),
+            0 0 80px var(--neon-color, var(--primary-color));
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.8; }
+    }
+
+    /* Glass Card */
+    .glass-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 30px;
+    }
+
+    /* Cover Page */
+    .cover .slide-content {
+        text-align: center;
+    }
+
+    .cover-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+    }
+
+    .cover-title {
+        font-size: 4rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .cover-subtitle {
+        font-size: 2rem;
+        color: var(--secondary-color);
+        font-weight: 400;
+    }
+
+    .cover-meta {
+        margin-top: 30px;
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .meta-separator {
+        margin: 0 15px;
+    }
+
+    /* TOC Page */
+    .toc-container {
+        text-align: center;
+    }
+
+    .toc-title {
+        font-size: 2.5rem;
+        margin-bottom: 40px;
+    }
+
+    .toc-items {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .toc-item {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 15px 30px;
+        background: var(--glass-bg);
+        border-radius: 10px;
+        border: 1px solid var(--glass-border);
+        transition: all 0.3s ease;
+    }
+
+    .toc-item:hover {
+        background: rgba(0, 245, 255, 0.1);
+        border-color: var(--primary-color);
+    }
+
+    .toc-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        min-width: 50px;
+    }
+
+    .toc-text {
+        font-size: 1.3rem;
+        flex: 1;
+        text-align: left;
+    }
+
+    /* Chapter Page */
+    .chapter-container {
+        text-align: center;
+    }
+
+    .chapter-number {
+        font-size: 10rem;
+        font-weight: 900;
+        line-height: 1;
+        margin-bottom: 20px;
+    }
+
+    .chapter-title {
+        font-size: 3rem;
+        font-weight: 400;
+    }
+
+    /* Content Page */
+    .content-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .content-title {
+        font-size: 2.5rem;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .content-description {
+        font-size: 1.2rem;
+        line-height: 1.8;
+        margin-bottom: 30px;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .content-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .content-item {
+        font-size: 1.3rem;
+        padding: 15px 0;
+        padding-left: 30px;
+        position: relative;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .content-item:last-child {
+        border-bottom: none;
+    }
+
+    .content-item::before {
+        content: '▹';
+        position: absolute;
+        left: 0;
+        color: var(--primary-color);
+    }
+
+    /* Two Column Page */
+    .two-column-container {
+        width: 100%;
+    }
+
+    .two-column-title {
+        font-size: 2rem;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .columns-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+    }
+
+    .column {
+        padding: 30px;
+    }
+
+    .column-title {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+    }
+
+    .column-description {
+        font-size: 1rem;
+        margin-bottom: 20px;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .column-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .column-item {
+        font-size: 1rem;
+        padding: 10px 0;
+        padding-left: 20px;
+        position: relative;
+    }
+
+    .column-item::before {
+        content: '•';
+        position: absolute;
+        left: 0;
+        color: var(--primary-color);
+    }
+
+    /* Code Page */
+    .code-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .code-title {
+        font-size: 2rem;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .code-block {
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 15px;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+
+    .code-header {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 10px 20px;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .code-language {
+        font-size: 0.9rem;
+        color: var(--primary-color);
+        font-weight: 500;
+    }
+
+    .code-content {
+        padding: 20px;
+        overflow-x: auto;
+    }
+
+    .code-content code {
+        font-family: "Fira Code", "Monaco", "Consolas", monospace;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: #e0e0e0;
+    }
+
+    .code-content .keyword {
+        color: var(--secondary-color);
+    }
+
+    .code-content .string {
+        color: #00ff88;
+    }
+
+    .code-content .comment {
+        color: #888;
+        font-style: italic;
+    }
+
+    .code-description {
+        font-size: 1rem;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Data Page */
+    .data-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .data-title {
+        font-size: 2rem;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .data-table-wrapper {
+        overflow-x: auto;
+        padding: 20px;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .data-header-row {
+        border-bottom: 2px solid var(--primary-color);
+    }
+
+    .data-header {
+        padding: 15px 20px;
+        text-align: left;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+
+    .data-row {
+        border-bottom: 1px solid var(--glass-border);
+        transition: all 0.3s ease;
+    }
+
+    .data-row:hover {
+        background: rgba(0, 245, 255, 0.05);
+    }
+
+    .data-cell {
+        padding: 15px 20px;
+        font-size: 1rem;
+    }
+
+    /* Timeline Page */
+    .timeline-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .timeline-title {
+        font-size: 2rem;
+        margin-bottom: 40px;
+        text-align: center;
+    }
+
+    .timeline-items {
+        position: relative;
+        padding-left: 40px;
+    }
+
+    .timeline-items::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 30px;
+    }
+
+    .timeline-dot {
+        position: absolute;
+        left: -40px;
+        top: 20px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }
+
+    .timeline-content {
+        padding: 20px;
+    }
+
+    .timeline-date {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .timeline-item-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .timeline-desc {
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Grid Page */
+    .grid-container {
+        width: 100%;
+        text-align: center;
+    }
+
+    .grid-title {
+        font-size: 2rem;
+        margin-bottom: 40px;
+    }
+
+    .grid-cards {
+        display: grid;
+        gap: 25px;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .grid-2x2 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .grid-3x3 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .grid-card {
+        padding: 30px 20px;
+        text-align: center;
+        transition: all 0.3s ease;
+        border: 1px solid var(--card-color, var(--primary-color));
+    }
+
+    .grid-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+    }
+
+    .card-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .card-desc {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* Quote Page */
+    .quote-container {
+        max-width: 800px;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .quote-title {
+        font-size: 1.5rem;
+        margin-bottom: 30px;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .quote-text {
+        padding: 40px;
+        border-left: 4px solid var(--primary-color);
+        margin-bottom: 30px;
+        text-align: left;
+    }
+
+    .quote-content {
+        font-size: 1.8rem;
+        line-height: 1.6;
+        font-style: italic;
+    }
+
+    .quote-author {
+        font-size: 1.2rem;
+        font-style: italic;
+    }
+
+    /* End Page */
+    .end .slide-content {
+        text-align: center;
+    }
+
+    .end-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+    }
+
+    .end-title {
+        font-size: 4rem;
+        font-weight: 700;
+    }
+
+    .end-subtitle {
+        font-size: 2rem;
+        font-weight: 400;
+    }
+
+    .end-meta {
+        margin-top: 30px;
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* Progress Bar */
+    .progress-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        z-index: 1000;
+        transition: width 0.3s ease;
+    }
+
+    /* Navigation Hints */
+    .nav-hints {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        display: flex;
+        gap: 10px;
+        z-index: 100;
+    }
+
+    .nav-hint {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: var(--text-color);
+    }
+
+    .nav-hint:hover {
+        background: rgba(0, 245, 255, 0.2);
+        border-color: var(--primary-color);
+    }
+
+    /* Slide Counter */
+    .slide-counter {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.6);
+        z-index: 100;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .cover-title,
+        .end-title {
+            font-size: 2.5rem;
+        }
+
+        .cover-subtitle,
+        .end-subtitle {
+            font-size: 1.5rem;
+        }
+
+        .chapter-number {
+            font-size: 6rem;
+        }
+
+        .chapter-title {
+            font-size: 2rem;
+        }
+
+        .columns-wrapper {
+            grid-template-columns: 1fr;
+        }
+
+        .grid-3x3 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .quote-content {
+            font-size: 1.4rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .grid-2x2,
+        .grid-3x3 {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="background">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- Slides Container -->
+    <div class="slides-container" id="slidesContainer">
+        <section class="slide cover" data-type="cover">
+            <div class="slide-content">
+                <div class="cover-container">
+                                        <h1 class="cover-title neon-text" style="--neon-color: #00f5ff">
+                        Kubernetes 核心概念
+                    </h1>
+                                        <h2 class="cover-subtitle">
+                        从架构到实践的完整指南
+                    </h2>
+                                        <div class="cover-meta">
+                        <span class="meta-author">作者</span> <span class="meta-separator">|</span> <span class="meta-date">2025.02.19</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="slide toc" data-type="toc">
+            <div class="slide-content">
+                <div class="toc-container">
+                    <h2 class="toc-title neon-text" style="--neon-color: #00f5ff">
+                        本期内容
+                    </h2>
+                    <div class="toc-items">
+                                                <div class="toc-item">
+                            <span class="toc-number">01</span>
+                            <span class="toc-text">核心架构组件</span>
+                        </div>
+                        <div class="toc-item">
+                            <span class="toc-number">02</span>
+                            <span class="toc-text">工作负载资源</span>
+                        </div>
+                        <div class="toc-item">
+                            <span class="toc-number">03</span>
+                            <span class="toc-text">服务发现与负载均衡</span>
+                        </div>
+                        <div class="toc-item">
+                            <span class="toc-number">04</span>
+                            <span class="toc-text">存储管理</span>
+                        </div>
+                        <div class="toc-item">
+                            <span class="toc-number">05</span>
+                            <span class="toc-text">配置与密钥</span>
+                        </div>
+                        <div class="toc-item">
+                            <span class="toc-number">06</span>
+                            <span class="toc-text">元数据与权限</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="slide chapter" data-type="chapter">
+            <div class="slide-content">
+                <div class="chapter-container">
+                    <div class="chapter-number neon-text" style="--neon-color: #00f5ff">
+                        01
+                    </div>
+                    <h2 class="chapter-title" style="color: #bf00ff">
+                        核心架构组件
+                    </h2>
+                </div>
+            </div>
+        </section>
+        <section class="slide content" data-type="content">
+            <div class="slide-content">
+                <div class="content-container glass-card">
+                                        <h2 class="content-title neon-text" style="--neon-color: #00f5ff">
+                        集群架构概览
+                    </h2>
+                                        <p class="content-description">
+                        Kubernetes 集群由 Master 节点和 Worker 节点组成
+                    </p>
+                                        <ul class="content-list">
+                        <li class="content-item">Master：集群的大脑，负责管理和决策</li>
+                        <li class="content-item">Node：集群的工人，真正运行业务应用</li>
+                        <li class="content-item">etcd：集群的数据库，保存所有状态</li>
+                        <li class="content-item">容器运行时：Docker、containerd 等</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        <section class="slide grid" data-type="grid">
+            <div class="slide-content">
+                <div class="grid-container">
+                                        <h2 class="grid-title">
+                        Master 组件
+                    </h2>
+                    <div class="grid-cards grid-2x2">
+                                                <div class="grid-card glass-card" style="--card-color: #00f5ff">
+                            <div class="card-icon" style="color: #00f5ff; text-shadow: 0 0 20px #00f5ff">
+                                ◉
+                            </div>
+                            <div class="card-title">API Server</div>
+                            <div class="card-desc">集群入口门户，所有操作都通过它</div>
+                        </div>
+                        <div class="grid-card glass-card" style="--card-color: #bf00ff">
+                            <div class="card-icon" style="color: #bf00ff; text-shadow: 0 0 20px #bf00ff">
+                                ◈
+                            </div>
+                            <div class="card-title">Scheduler</div>
+                            <div class="card-desc">调度器，决定 Pod 运行在哪个节点</div>
+                        </div>
+                        <div class="grid-card glass-card" style="--card-color: #ff006e">
+                            <div class="card-icon" style="color: #ff006e; text-shadow: 0 0 20px #ff006e">
+                                ◆
+                            </div>
+                            <div class="card-title">Controller</div>
+                            <div class="card-desc">控制器，确保实际状态向期望状态靠拢</div>
+                        </div>
+                        <div class="grid-card glass-card" style="--card-color: #ff9500">
+                            <div class="card-icon" style="color: #ff9500; text-shadow: 0 0 20px #ff9500">
+                                ▣
+                            </div>
+                            <div class="card-title">etcd</div>
+                            <div class="card-desc">键值数据库，保存所有集群数据</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="slide grid" data-type="grid">
+            <div class="slide-content">
+                <div class="grid-container">
+                                        <h2 class="grid-title">
+                        Node 组件
+                    </h2>
+                    <div class="grid-cards grid-2x2">
+                                                <div class="grid-card glass-card" style="--card-color: #00f5ff">
+                            <div class="card-icon" style="color: #00f5ff; text-shadow: 0 0 20px #00f5ff">
+                                ◉
+                            </div>
+                            <div class="card-title">kubelet</div>
+                            <div class="card-desc">节点代理，与 Master 通信管理 Pod</div>
+                        </div>
+                        <div class="grid-card glass-card" style="--card-color: #bf00ff">
+                            <div class="card-icon" style="color: #bf00ff; text-shadow: 0 0 20px #bf00ff">
+                                ◈
+                            </div>
+                            <div class="card-title">kube-proxy</div>
+                            <div class="card-desc">网络代理，维护节点网络规则</div>
+                        </div>
+                        <div class="grid-card glass-card" style="--card-color: #ff006e">
+                            <div class="card-icon" style="color: #ff006e; text-shadow: 0 0 20px #ff006e">
+                                ◆
+                            </div>
+                            <div class="card-title">容器运行时</div>
+                            <div class="card-desc">Docker/containerd，真正运行容器</div>
+                        </div>
+                        <div class="grid-card glass-card" style="--card-color: #ff9500">
+                            <div class="card-icon" style="color: #ff9500; text-shadow: 0 0 20px #ff9500">
+                                ▣
+                            </div>
+                            <div class="card-title">Pod</div>
+                            <div class="card-desc">最小部署单元，一组容器的集合</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="slide chapter" data-type="chapter">
+            <div class="slide-content">
+                <div class="chapter-container">
+                    <div class="chapter-number neon-text" style="--neon-color: #00f5ff">
+                        02
+                    </div>
+                    <h2 class="chapter-title" style="color: #bf00ff">
+                        工作负载资源
+                    </h2>
+                </div>
+            </div>
+        </section>
+        <section class="slide content" data-type="content">
+            <div class="slide-content">
+                <div class="content-container glass-card">
+                                        <h2 class="content-title neon-text" style="--neon-color: #00f5ff">
+                        Pod - 最小部署单元
+                    </h2>
+                                        <p class="content-description">
+                        Kubernetes 中最小的部署单元，一个或多个容器的组合
+                    </p>
+                                        <ul class="content-list">
+                        <li class="content-item">共享网络：同一 Pod 内容器共享网络命名空间</li>
+                        <li class="content-item">共享存储：可以挂载共享卷</li>
+                        <li class="content-item">同生共死：一起调度、一起销毁</li>
+                        <li class="content-item">类比：一个&quot;逻辑主机&quot;，里面运行紧密协作的进程</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        <section class="slide two-column" data-type="two-column">
+            <div class="slide-content">
+                <div class="two-column-container">
+                                        <h2 class="two-column-title neon-text" style="--neon-color: #00f5ff">
+                        Deployment vs StatefulSet
+                    </h2>
+                    <div class="columns-wrapper">
+                                            <div class="column column-left glass-card">
+                                                <h3 class="column-title" style="color: #00f5ff">
+                            Deployment
+                        </h3>
+                                                <p class="column-description">
+                            无状态应用管理
+                        </p>
+                                                <ul class="column-list">
+                            <li class="column-item">副本数可伸缩</li>
+                            <li class="column-item">滚动更新</li>
+                            <li class="column-item">Pod 身份不固定</li>
+                            <li class="column-item">适合 Web 服务、API</li>
+                        </ul>
+                    </div>
+                                            <div class="column column-right glass-card">
+                                                <h3 class="column-title" style="color: #bf00ff">
+                            StatefulSet
+                        </h3>
+                                                <p class="column-description">
+                            有状态应用管理
+                        </p>
+                                                <ul class="column-list">
+                            <li class="column-item">稳定的网络标识</li>
+                            <li class="column-item">持久化存储</li>
+                            <li class="column-item">有序部署和扩展</li>
+                            <li class="column-item">适合数据库、缓存</li>
+                        </ul>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="slide grid" data-type="grid">
+            <div class="slide-content">
+                <div class="grid-container">
+                                        <h2 class="grid-title">
+                        其他工作负载类型
+                    </h2>
+                    <div class="grid-cards grid-2x2">
+                                                <div class="grid-card glass-card" style="--card-color: #00f5ff">
+                            <div class="card-icon" style="color: #00f5ff; text-shadow: 0 0 20px #00f5ff">
+                                ◉
+                            </div>
+                            <div class="card-title">DaemonSet</div>
+                            <div class="card-desc">每个节点运行一个 Pod 副本</div>
+                        </div>
+                        <div class="grid-card glass-card" style="--card-color: #bf00ff">
+                            <div class="card-icon" style="color: #bf00ff; text-shadow: 0 0 20px #bf00ff">
+                                ◈
+                            </div>
+                            <div class="card-title">Job</div>
+                            <div class="card-desc">一次性任务，完成后退出</div>
+                        </div>
+                        <div class="grid-card glass-card" style="--card-color: #ff006e">
+                            <div class="card-icon" style="color: #ff006e; text-shadow: 0 0 20px #ff006e">
+                                ◆
+                            </div>
+                            <div class="card-title">CronJob</div>
+                            <div class="card-desc">定时任务，按计划周期执行</div>
+                        </div>
+                        <div class="grid-card glass-card" style="--card-color: #ff9500">
+                            <div class="card-icon" style="color: #ff9500; text-shadow: 0 0 20px #ff9500">
+                                ▣
+                            </div>
+                            <div class="card-title">ReplicaSet</div>
+                            <div class="card-desc">维持指定数量的 Pod 副本</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="slide content" data-type="content">
+            <div class="slide-content">
+                <div class="content-container glass-card">
+                                        <h2 class="content-title neon-text" style="--neon-color: #00f5ff">
+                        DaemonSet 使用场景
+                    </h2>
+                                        <p class="content-description">
+                        确保每个节点上都运行一个 Pod 副本的控制器
+                    </p>
+                                        <ul class="content-list">
+                        <li class="content-item">日志收集：Fluentd、Filebeat</li>
+                        <li class="content-item">监控采集：Prometheus Node Exporter</li>
+                        <li class="content-item">网络插件：Calico、Flannel</li>
+                        <li class="content-item">存储插件：Ceph、GlusterFS</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        <section class="slide chapter" data-type="chapter">
+            <div class="slide-content">
+                <div class="chapter-container">
+                    <div class="chapter-number neon-text" style="--neon-color: #00f5ff">
+                        03
+                    </div>
+                    <h2 class="chapter-title" style="color: #bf00ff">
+                        服务发现与负载均衡
+                    </h2>
+                </div>
+            </div>
+        </section>
+        <section class="slide content" data-type="content">
+            <div class="slide-content">
+                <div class="content-container glass-card">
+                                        <h2 class="content-title neon-text" style="--neon-color: #00f5ff">
+                        Service 核心概念
+                    </h2>
+                                        <p class="content-description">
+                        将一组 Pod 暴露为网络服务的抽象方式
+                    </p>
+                                        <ul class="content-list">
+                        <li class="content-item">固定入口：Pod IP 会变化，Service 提供稳定访问点</li>
+                        <li class="content-item">负载均衡：自动将请求分发到后端 Pod</li>
+                        <li class="content-item">服务发现：通过 DNS 名称访问服务</li>
+                        <li class="content-item">解耦：前端不需要知道后端 Pod 的具体 IP</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        <section class="slide data" data-type="data">
+            <div class="slide-content">
+                <div class="data-container">
+                                        <h2 class="data-title neon-text" style="--neon-color: #00f5ff">
+                        Service 四种类型
+                    </h2>
+                                        <div class="data-table-wrapper glass-card" style="background: rgba(0, 245, 255, 0.05)">
+                        <table class="data-table">
+                            <thead>
+                                <tr class="data-header-row">
+                            <th class="data-header">类型</th>
+                            <th class="data-header">访问范围</th>
+                            <th class="data-header">使用场景</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                        <tr class="data-row">
+                                <td class="data-cell">ClusterIP</td>
+                                <td class="data-cell">集群内部</td>
+                                <td class="data-cell">内部服务通信</td>
+                        </tr>
+                        <tr class="data-row">
+                                <td class="data-cell">NodePort</td>
+                                <td class="data-cell">节点IP:端口</td>
+                                <td class="data-cell">开发测试环境</td>
+                        </tr>
+                        <tr class="data-row">
+                                <td class="data-cell">LoadBalancer</td>
+                                <td class="data-cell">外部负载均衡</td>
+                                <td class="data-cell">生产环境暴露</td>
+                        </tr>
+                        <tr class="data-row">
+                                <td class="data-cell">ExternalName</td>
+                                <td class="data-cell">外部域名映射</td>
+                                <td class="data-cell">访问外部服务</td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="slide content" data-type="content">
+            <div class="slide-content">
+                <div class="content-container glass-card">
+                                        <h2 class="content-title neon-text" style="--neon-color: #00f5ff">
+                        Ingress - 七层路由入口
+                    </h2>
+                                        <p class="content-description">
+                        管理集群外部访问集群内部服务的 API 对象
+                    </p>
+                                        <ul class="content-list">
+                        <li class="content-item">7层负载：基于域名、URL 路径的路由</li>
+                        <li class="content-item">SSL 终止：统一处理 HTTPS 证书</li>
+                        <li class="content-item">虚拟主机：一个 IP 托管多个服务</li>
+                        <li class="content-item">需要控制器：Nginx Ingress、Traefik 等</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        <section class="slide chapter" data-type="chapter">
+            <div class="slide-content">
+                <div class="chapter-container">
+                    <div class="chapter-number neon-text" style="--neon-color: #00f5ff">
+                        04
+                    </div>
+                    <h2 class="chapter-title" style="color: #bf00ff">
+                        存储管理
+                    </h2>
+                </div>
+            </div>
+        </section>
+        <section class="slide grid" data-type="grid">
+            <div class="slide-content">
+                <div class="grid-container">
+                                        <h2 class="grid-title">
+                        存储核心概念
+                    </h2>
+                    <div class="grid-cards grid-2x2">
+                                                <div class="grid-card glass-card" style="--card-color: #00f5ff">
+                            <div class="card-icon" style="color: #00f5ff; text-shadow: 0 0 20px #00f5ff">
+                                ◉
+                            </div>
+                            <div class="card-title">Volume</div>
+                            <div class="card-desc">Pod 内容器共享的存储目录</div>
+                        </div>
+                        <div class="grid-card glass-card" style="--card-color: #bf00ff">
+                            <div class="card-icon" style="color: #bf00ff; text-shadow: 0 0 20px #bf00ff">
+                                ◈
+                            </div>
+                            <div class="card-title">PV</div>
+                            <div class="card-desc">持久卷，管理员准备的存储资源</div>
+                        </div>
+                        <div class="grid-card glass-card" style="--card-color: #ff006e">
+                            <div class="card-icon" style="color: #ff006e; text-shadow: 0 0 20px #ff006e">
+                                ◆
+                            </div>
+                            <div class="card-title">PVC</div>
+                            <div class="card-desc">持久卷声明，用户对存储的申请</div>
+                        </div>
+                        <div class="grid-card glass-card" style="--card-color: #ff9500">
+                            <div class="card-icon" style="color: #ff9500; text-shadow: 0 0 20px #ff9500">
+                                ▣
+                            </div>
+                            <div class="card-title">StorageClass</div>
+                            <div class="card-desc">存储类型模板，动态创建 PV</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="slide two-column" data-type="two-column">
+            <div class="slide-content">
+                <div class="two-column-container">
+                                        <h2 class="two-column-title neon-text" style="--neon-color: #00f5ff">
+                        PV 与 PVC 的关系
+                    </h2>
+                    <div class="columns-wrapper">
+                                            <div class="column column-left glass-card">
+                                                <h3 class="column-title" style="color: #00f5ff">
+                            PV（持久卷）
+                        </h3>
+                                                <p class="column-description">
+                            管理员准备的资源
+                        </p>
+                                                <ul class="column-list">
+                            <li class="column-item">独立于 Pod 存在</li>
+                            <li class="column-item">定义容量和访问模式</li>
+                            <li class="column-item">绑定后专属于 PVC</li>
+                            <li class="column-item">类比：一块硬盘</li>
+                        </ul>
+                    </div>
+                                            <div class="column column-right glass-card">
+                                                <h3 class="column-title" style="color: #bf00ff">
+                            PVC（持久卷声明）
+                        </h3>
+                                                <p class="column-description">
+                            用户的存储申请
+                        </p>
+                                                <ul class="column-list">
+                            <li class="column-item">声明所需容量和类型</li>
+                            <li class="column-item">自动匹配满足条件的 PV</li>
+                            <li class="column-item">被 Pod 挂载使用</li>
+                            <li class="column-item">类比：申请单</li>
+                        </ul>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="slide content" data-type="content">
+            <div class="slide-content">
+                <div class="content-container glass-card">
+                                        <h2 class="content-title neon-text" style="--neon-color: #00f5ff">
+                        StorageClass 动态供给
+                    </h2>
+                                        <p class="content-description">
+                        定义存储的类型模板，实现 PV 的动态创建
+                    </p>
+                                        <ul class="content-list">
+                        <li class="content-item">按需创建：创建 PVC 时自动创建 PV</li>
+                        <li class="content-item">类型定义：关联 SSD、HDD 等存储类型</li>
+                        <li class="content-item">回收策略：Delete 或 Retain</li>
+                        <li class="content-item">解耦应用：开发者无需关心底层存储实现</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        <section class="slide chapter" data-type="chapter">
+            <div class="slide-content">
+                <div class="chapter-container">
+                    <div class="chapter-number neon-text" style="--neon-color: #00f5ff">
+                        05
+                    </div>
+                    <h2 class="chapter-title" style="color: #bf00ff">
+                        配置与密钥
+                    </h2>
+                </div>
+            </div>
+        </section>
+        <section class="slide two-column" data-type="two-column">
+            <div class="slide-content">
+                <div class="two-column-container">
+                                        <h2 class="two-column-title neon-text" style="--neon-color: #00f5ff">
+                        ConfigMap vs Secret
+                    </h2>
+                    <div class="columns-wrapper">
+                                            <div class="column column-left glass-card">
+                                                <h3 class="column-title" style="color: #00f5ff">
+                            ConfigMap
+                        </h3>
+                                                <p class="column-description">
+                            非敏感配置数据
+                        </p>
+                                                <ul class="column-list">
+                            <li class="column-item">配置文件内容</li>
+                            <li class="column-item">环境变量</li>
+                            <li class="column-item">命令行参数</li>
+                            <li class="column-item">明文存储</li>
+                        </ul>
+                    </div>
+                                            <div class="column column-right glass-card">
+                                                <h3 class="column-title" style="color: #bf00ff">
+                            Secret
+                        </h3>
+                                                <p class="column-description">
+                            敏感信息数据
+                        </p>
+                                                <ul class="column-list">
+                            <li class="column-item">密码、Token</li>
+                            <li class="column-item">SSH 密钥</li>
+                            <li class="column-item">OAuth 令牌</li>
+                            <li class="column-item">Base64 编码</li>
+                        </ul>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="slide content" data-type="content">
+            <div class="slide-content">
+                <div class="content-container glass-card">
+                                        <h2 class="content-title neon-text" style="--neon-color: #00f5ff">
+                        ConfigMap 使用方式
+                    </h2>
+                                        <p class="content-description">
+                        将应用的配置信息与容器镜像分离
+                    </p>
+                                        <ul class="content-list">
+                        <li class="content-item">环境变量注入：作为 Pod 的环境变量</li>
+                        <li class="content-item">配置文件挂载：作为 Volume 挂载到容器</li>
+                        <li class="content-item">命令行参数：在启动命令中引用</li>
+                        <li class="content-item">热更新：修改 ConfigMap 可触发 Pod 更新</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        <section class="slide chapter" data-type="chapter">
+            <div class="slide-content">
+                <div class="chapter-container">
+                    <div class="chapter-number neon-text" style="--neon-color: #00f5ff">
+                        06
+                    </div>
+                    <h2 class="chapter-title" style="color: #bf00ff">
+                        元数据与权限
+                    </h2>
+                </div>
+            </div>
+        </section>
+        <section class="slide content" data-type="content">
+            <div class="slide-content">
+                <div class="content-container glass-card">
+                                        <h2 class="content-title neon-text" style="--neon-color: #00f5ff">
+                        Namespace 资源隔离
+                    </h2>
+                                        <p class="content-description">
+                        在同一个物理集群内实现资源隔离的虚拟集群
+                    </p>
+                                        <ul class="content-list">
+                        <li class="content-item">环境隔离：dev、test、prod 环境分开</li>
+                        <li class="content-item">团队隔离：不同团队使用不同命名空间</li>
+                        <li class="content-item">资源配额：可限制每个 Namespace 的资源使用</li>
+                        <li class="content-item">访问控制：可针对 Namespace 设置权限</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        <section class="slide grid" data-type="grid">
+            <div class="slide-content">
+                <div class="grid-container">
+                                        <h2 class="grid-title">
+                        Label 与 Selector
+                    </h2>
+                    <div class="grid-cards grid-2x2">
+                                                <div class="grid-card glass-card" style="--card-color: #00f5ff">
+                            <div class="card-icon" style="color: #00f5ff; text-shadow: 0 0 20px #00f5ff">
+                                ◉
+                            </div>
+                            <div class="card-title">Label</div>
+                            <div class="card-desc">键值对标签，标识对象属性</div>
+                        </div>
+                        <div class="grid-card glass-card" style="--card-color: #bf00ff">
+                            <div class="card-icon" style="color: #bf00ff; text-shadow: 0 0 20px #bf00ff">
+                                ◈
+                            </div>
+                            <div class="card-title">Selector</div>
+                            <div class="card-desc">根据标签筛选对象</div>
+                        </div>
+                        <div class="grid-card glass-card" style="--card-color: #ff006e">
+                            <div class="card-icon" style="color: #ff006e; text-shadow: 0 0 20px #ff006e">
+                                ◆
+                            </div>
+                            <div class="card-title">Annotation</div>
+                            <div class="card-desc">非标识性元数据</div>
+                        </div>
+                        <div class="grid-card glass-card" style="--card-color: #ff9500">
+                            <div class="card-icon" style="color: #ff9500; text-shadow: 0 0 20px #ff9500">
+                                ▣
+                            </div>
+                            <div class="card-title">LimitRange</div>
+                            <div class="card-desc">资源限制范围</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="slide data" data-type="data">
+            <div class="slide-content">
+                <div class="data-container">
+                                        <h2 class="data-title neon-text" style="--neon-color: #00f5ff">
+                        RBAC 权限模型
+                    </h2>
+                                        <div class="data-table-wrapper glass-card" style="background: rgba(0, 245, 255, 0.05)">
+                        <table class="data-table">
+                            <thead>
+                                <tr class="data-header-row">
+                            <th class="data-header">组件</th>
+                            <th class="data-header">作用范围</th>
+                            <th class="data-header">功能</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                        <tr class="data-row">
+                                <td class="data-cell">Role</td>
+                                <td class="data-cell">Namespace</td>
+                                <td class="data-cell">定义命名空间内权限</td>
+                        </tr>
+                        <tr class="data-row">
+                                <td class="data-cell">ClusterRole</td>
+                                <td class="data-cell">集群</td>
+                                <td class="data-cell">定义集群级别权限</td>
+                        </tr>
+                        <tr class="data-row">
+                                <td class="data-cell">RoleBinding</td>
+                                <td class="data-cell">Namespace</td>
+                                <td class="data-cell">绑定角色到用户</td>
+                        </tr>
+                        <tr class="data-row">
+                                <td class="data-cell">ClusterRoleBinding</td>
+                                <td class="data-cell">集群</td>
+                                <td class="data-cell">绑定集群角色到用户</td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="slide content" data-type="content">
+            <div class="slide-content">
+                <div class="content-container glass-card">
+                                        <h2 class="content-title neon-text" style="--neon-color: #00f5ff">
+                        ServiceAccount
+                    </h2>
+                                        <p class="content-description">
+                        为 Pod 中的进程提供的身份标识
+                    </p>
+                                        <ul class="content-list">
+                        <li class="content-item">Pod 身份：让 Pod 可以访问 Kubernetes API</li>
+                        <li class="content-item">自动挂载：Token 自动挂载到 Pod 内</li>
+                        <li class="content-item">权限绑定：通过 RoleBinding 关联权限</li>
+                        <li class="content-item">安全隔离：不同 Pod 使用不同 ServiceAccount</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        <section class="slide quote" data-type="quote">
+            <div class="slide-content">
+                <div class="quote-container">
+                                        <h2 class="quote-title">
+                        设计哲学
+                    </h2>
+                                        <blockquote class="quote-text glass-card" style="border-left-color: #00f5ff">
+                        <p class="quote-content neon-text" style="--neon-color: #00f5ff">
+                            "Kubernetes 让开发者专注于应用本身，而不是基础设施的复杂性。"
+                        </p>
+                    </blockquote>
+                                        <div class="quote-author" style="color: #bf00ff">
+                        — K8s 设计理念
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="slide timeline" data-type="timeline">
+            <div class="slide-content">
+                <div class="timeline-container">
+                                        <h2 class="timeline-title neon-text" style="--neon-color: #00f5ff">
+                        典型工作流程
+                    </h2>
+                    <div class="timeline-items">
+                                                <div class="timeline-item">
+                            <div class="timeline-dot" style="background: #00f5ff; box-shadow: 0 0 10px #00f5ff"></div>
+                            <div class="timeline-content glass-card">
+                                <div class="timeline-date" style="color: #00f5ff">1.</div>
+                                <div class="timeline-item-title">编写 Deployment</div>
+                                <div class="timeline-desc">定义 Pod 模板，包含镜像和端口</div>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot" style="background: #bf00ff; box-shadow: 0 0 10px #bf00ff"></div>
+                            <div class="timeline-content glass-card">
+                                <div class="timeline-date" style="color: #bf00ff">2.</div>
+                                <div class="timeline-item-title">创建 Service</div>
+                                <div class="timeline-desc">通过 Label Selector 找到后端 Pod</div>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot" style="background: #00f5ff; box-shadow: 0 0 10px #00f5ff"></div>
+                            <div class="timeline-content glass-card">
+                                <div class="timeline-date" style="color: #00f5ff">3.</div>
+                                <div class="timeline-item-title">配置 Ingress</div>
+                                <div class="timeline-desc">设置域名路由规则</div>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot" style="background: #bf00ff; box-shadow: 0 0 10px #bf00ff"></div>
+                            <div class="timeline-content glass-card">
+                                <div class="timeline-date" style="color: #bf00ff">4.</div>
+                                <div class="timeline-item-title">注入配置</div>
+                                <div class="timeline-desc">创建 ConfigMap 和 Secret</div>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot" style="background: #00f5ff; box-shadow: 0 0 10px #00f5ff"></div>
+                            <div class="timeline-content glass-card">
+                                <div class="timeline-date" style="color: #00f5ff">5.</div>
+                                <div class="timeline-item-title">挂载存储</div>
+                                <div class="timeline-desc">创建 PVC 并挂载到 Pod</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="slide grid" data-type="grid">
+            <div class="slide-content">
+                <div class="grid-container">
+                                        <h2 class="grid-title">
+                        核心概念回顾
+                    </h2>
+                    <div class="grid-cards grid-2x2">
+                                                <div class="grid-card glass-card" style="--card-color: #00f5ff">
+                            <div class="card-icon" style="color: #00f5ff; text-shadow: 0 0 20px #00f5ff">
+                                ◉
+                            </div>
+                            <div class="card-title">架构</div>
+                            <div class="card-desc">Master + Node，控制与工作分离</div>
+                        </div>
+                        <div class="grid-card glass-card" style="--card-color: #bf00ff">
+                            <div class="card-icon" style="color: #bf00ff; text-shadow: 0 0 20px #bf00ff">
+                                ◈
+                            </div>
+                            <div class="card-title">工作负载</div>
+                            <div class="card-desc">Pod、Deployment、StatefulSet</div>
+                        </div>
+                        <div class="grid-card glass-card" style="--card-color: #ff006e">
+                            <div class="card-icon" style="color: #ff006e; text-shadow: 0 0 20px #ff006e">
+                                ◆
+                            </div>
+                            <div class="card-title">网络</div>
+                            <div class="card-desc">Service、Ingress 服务发现</div>
+                        </div>
+                        <div class="grid-card glass-card" style="--card-color: #ff9500">
+                            <div class="card-icon" style="color: #ff9500; text-shadow: 0 0 20px #ff9500">
+                                ▣
+                            </div>
+                            <div class="card-title">存储</div>
+                            <div class="card-desc">PV、PVC、StorageClass</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="slide end" data-type="end">
+            <div class="slide-content">
+                <div class="end-container">
+                                        <h1 class="end-title neon-text" style="--neon-color: #00f5ff">
+                        感谢观看
+                    </h1>
+                                        <h2 class="end-subtitle" style="color: #bf00ff">
+                        点赞关注不迷路
+                    </h2>
+                                        <div class="end-meta">
+                        <span class="meta-author">作者</span> <span class="meta-separator">|</span> <span class="meta-contact">B站/公众号</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Navigation Hints -->
+    <div class="nav-hints">
+        <div class="nav-hint" onclick="prevSlide()">←</div>
+        <div class="nav-hint" onclick="nextSlide()">→</div>
+    </div>
+
+    <!-- Slide Counter -->
+    <div class="slide-counter" id="slideCounter">1 / 1</div>
+
+    <script>
+        // Slide Navigation
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(index) {
+            if (index < 0) index = 0;
+            if (index >= totalSlides) index = totalSlides - 1;
+
+            slides.forEach((slide, i) => {
+                slide.classList.remove('active', 'prev');
+                if (i < index) {
+                    slide.classList.add('prev');
+                } else if (i === index) {
+                    slide.classList.add('active');
+                }
+            });
+
+            currentSlide = index;
+            updateProgress();
+            updateCounter();
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                showSlide(currentSlide + 1);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                showSlide(currentSlide - 1);
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function updateCounter() {
+            document.getElementById('slideCounter').textContent =
+                `${currentSlide + 1} / ${totalSlides}`;
+        }
+
+        // Keyboard Navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            } else if (e.key === 'Home') {
+                showSlide(0);
+            } else if (e.key === 'End') {
+                showSlide(totalSlides - 1);
+            }
+        });
+
+        // Touch Navigation
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const diff = touchStartX - touchEndX;
+
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    nextSlide();
+                } else {
+                    prevSlide();
+                }
+            }
+        }
+
+        // Initialize
+        showSlide(0);
+    </script>
+</body>
+</html>

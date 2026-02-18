@@ -1,0 +1,190 @@
+一、核心架构组件
+这些是组成 Kubernetes 集群本身的"零件"。
+
+1. Master 组件
+含义： 集群的"大脑"和"控制中心"，负责整个集群的管理和决策。
+
+API Server： 集群的入口，所有操作（kubectl、UI、其他组件）都要通过它，相当于"门户"。
+
+Scheduler： 调度器，负责决定新创建的 Pod 该放在哪个节点上运行，相当于"分派员"。
+
+Controller Manager： 控制器管理者，运行着各种控制器（如节点控制器、副本控制器），不断确保实际状态向期望状态靠拢，相当于"监督员"。
+
+etcd： 集群的数据库，以键值对形式保存所有集群数据（期望状态和实际状态），相当于"记忆中心"。
+
+2. Node 组件
+含义： 集群的"工人"，真正运行业务应用的机器（物理机或虚拟机）。
+
+kubelet： 节点上的"代理人"，负责与 Master 通信，接收指令并管理节点上的 Pod 和容器。
+
+kube-proxy： 负责节点上的网络规则维护，实现服务发现和负载均衡。
+
+容器运行时： 真正运行容器的软件，如 Docker、containerd、CRI-O。
+
+二、工作负载资源
+这些是你实际部署和运行应用的"容器"和"管理器"。
+
+1. Pod
+含义： Kubernetes 中最小的部署单元，一个或多个容器的组合。它们共享网络和存储。
+
+类比： 一个"逻辑主机"，里面可以有一个或多个紧密协作的进程（容器）。
+
+2. Deployment
+含义： 最常用的控制器，用于管理无状态应用。
+
+作用： 声明式地定义应用的期望状态（比如运行 3 个 Nginx 副本），Deployment 会负责创建、更新、滚动升级，并保证始终有指定数量的 Pod 在运行。
+
+场景： Web 服务、API 后端等不需要保存本地数据的应用。
+
+3. StatefulSet
+含义： 用于管理有状态应用的控制器。
+
+作用： 为每个 Pod 提供稳定的身份标识（如稳定的网络标识和持久化存储），并按顺序启动、更新和删除。
+
+场景： 数据库（MySQL、Redis）、ZooKeeper、Kafka 等需要持久化存储和稳定网络标识的应用。
+
+4. DaemonSet
+含义： 确保每个（或某些）节点上都运行一个 Pod 副本的控制器。
+
+作用： 当有新节点加入集群时，DaemonSet 会自动在该节点上创建一个 Pod；节点移除时，Pod 也会被回收。
+
+场景： 日志收集（Fluentd）、监控采集（Prometheus Node Exporter）、网络插件（Calico）等节点级别的守护进程。
+
+5. Job / CronJob
+含义： 用于管理批处理任务的控制器。
+
+Job： 负责运行一次性任务（如数据迁移、计算任务），任务完成后 Pod 就会退出。
+
+CronJob： 按照时间计划（类似 Linux cron 语法）定期执行任务（如每天备份数据库）。
+
+三、服务发现与负载均衡
+这些是让应用能够被访问和互相通信的"网络设施"。
+
+1. Service
+含义： 将一组 Pod 暴露为网络服务的抽象方式。
+
+为什么需要： Pod 是动态创建和销毁的，IP 地址会变化。Service 提供了一个固定的访问入口（IP 和 DNS 名称），并将请求转发到后端的 Pod。
+
+四种类型：
+
+ClusterIP（默认）： 在集群内部暴露服务，仅供集群内访问。
+
+NodePort： 在每个节点的 IP 上开放一个静态端口，通过 节点IP:端口 从集群外部访问。
+
+LoadBalancer： 借助云提供商（如阿里云、AWS）创建一个外部负载均衡器，将流量引入集群。
+
+ExternalName： 将 Service 映射到一个外部域名。
+
+2. Ingress
+含义： 管理集群外部访问集群内部服务的 API 对象，通常作为 HTTP/HTTPS 路由的入口。
+
+作用： 相比 NodePort 或 LoadBalancer 的 4 层（IP+端口）负载均衡，Ingress 工作在 7 层（HTTP/HTTPS），可以实现基于域名、URL 路径的路由、SSL 终止等功能。
+
+类比： 类似 Nginx 的反向代理配置，但它是 Kubernetes 的原生资源，需要配合 Ingress Controller（如 Nginx Ingress Controller、Traefik）来工作。
+
+四、存储
+这些是让应用持久化保存数据的"磁盘"。
+
+1. Volume
+含义： Pod 中的容器可以访问的共享目录。
+
+作用： 解决容器崩溃后数据丢失的问题，以及容器间共享数据的需求。
+
+常见类型： emptyDir（临时目录）、hostPath（挂载主机目录）、云盘（如 AWS EBS、阿里云云盘）。
+
+2. PersistentVolume (PV) 和 PersistentVolumeClaim (PVC)
+含义： 将存储资源的管理和使用分离。
+
+PV（持久卷）： 由管理员预先准备的存储资源（就像一块"硬盘"），它独立于 Pod 存在。
+
+PVC（持久卷声明）： 用户对存储资源的"申请"（就像申请"我需要一块 10GB 的快速硬盘"）。Kubernetes 会找到一个满足要求的 PV 与 PVC 绑定。
+
+好处： 应用开发者不需要关心底层存储的具体实现（NFS、Ceph 还是云盘），只需声明自己的需求即可。
+
+3. StorageClass
+含义： 定义存储的"类型"或"模板"。
+
+作用： 可以动态地创建 PV。比如定义一个 StorageClass "fast"，关联到云上的 SSD 云盘。当用户创建 PVC 时，系统可以动态地根据 StorageClass 自动创建 PV。
+
+类比： 类似面向对象编程中的"类"，根据这个类可以动态地创建出具体的"对象"（PV）。
+
+五、配置与密钥
+这些是将配置信息与容器镜像解耦的"配置文件"。
+
+1. ConfigMap
+含义： 用于保存非敏感信息的键值对配置数据。
+
+作用： 将应用的配置信息（如配置文件内容、环境变量）与容器镜像分离，使得镜像可以在不同环境中复用（比如开发环境、测试环境的配置不同）。
+
+使用方式： 可以作为环境变量注入到 Pod，也可以作为卷挂载成配置文件。
+
+2. Secret
+含义： 类似于 ConfigMap，但专门用于保存敏感信息。
+
+作用： 保存密码、OAuth 令牌、SSH 密钥等敏感数据。Secret 会以 Base64 编码存储，并支持更严格的访问控制。
+
+使用方式： 同样可以作为环境变量或文件卷挂载到 Pod。
+
+六、元数据与作用域
+这些是对资源进行分组、限制和权限控制的"管理工具"。
+
+1. Namespace
+含义： 虚拟集群，用于在同一个物理集群内实现资源隔离。
+
+作用： 将对象分组管理，不同 Namespace 中的资源可以重名。常用于区分环境（dev/test/prod）或团队。
+
+2. Label 和 Selector
+含义： Kubernetes 的标识和筛选机制。
+
+Label（标签）： 附加在对象上的键值对（如 app: nginx、env: prod）。每个对象可以有多个标签。
+
+Selector（选择器）： 根据标签筛选对象（如 app=nginx）。Deployment 通过 Selector 找到它要管理的 Pod；Service 通过 Selector 找到它要转发流量的后端 Pod。
+
+类比： 标签就像给云服务器打的"标记"（如"环境：生产"），选择器就像根据标记搜索服务器。
+
+3. Annotation
+含义： 与 Label 类似，但用于存储非标识性的元数据。
+
+作用： 用于工具和库的辅助信息，不能用于 Selector 筛选。比如记录构建信息、版本号、联系人、或者给 Ingress 添加特定的 Nginx 配置参数。
+
+4. LimitRange 和 ResourceQuota
+含义： 资源限制和管理策略。
+
+LimitRange（范围限制）： 在 Namespace 级别，为 Pod 或容器设置默认的资源请求（request）和限制（limit），以及最小/最大值。
+
+ResourceQuota（资源配额）： 在 Namespace 级别，限制该 Namespace 总共能使用的资源总量（如总 CPU 不超过 10 核，总内存不超过 20Gi，最多创建 50 个 Pod）。
+
+七、权限控制（RBAC）
+这些是控制谁能对哪些资源做什么操作的"权限系统"。
+
+1. Role 和 ClusterRole
+含义： 定义一组权限规则。
+
+Role（角色）： 作用于某个特定 Namespace，定义该 Namespace 内的资源操作权限。
+
+ClusterRole（集群角色）： 作用于整个集群，可以访问所有 Namespace 的资源或集群级别的资源（如 Node）。
+
+2. RoleBinding 和 ClusterRoleBinding
+含义： 将角色绑定到具体的用户、组或服务账户上。
+
+RoleBinding： 在某个 Namespace 内，将 Role 绑定给一个用户。
+
+ClusterRoleBinding： 在整个集群级别，将 ClusterRole 绑定给一个用户。
+
+3. ServiceAccount
+含义： 为 Pod 中的进程提供的身份标识。
+
+作用： 当 Pod 需要访问 Kubernetes API（比如想查询其他 Pod 的状态）时，需要提供一个身份，这个身份就是 ServiceAccount。它关联了相应的 Secret（包含 Token）和权限（通过 RoleBinding）。
+
+总结：常见工作流程中的概念关联
+你编写 Deployment 的 YAML，其中包含 PodTemplate，定义了要运行的容器镜像和端口。
+
+Deployment 通过 Label Selector 管理它创建的 Pod。
+
+为了访问这些 Pod，你创建一个 Service，它通过同样的 Label Selector 找到后端 Pod。
+
+为了让外部通过域名访问，你创建一个 Ingress，配置路由规则转发到上面的 Service。
+
+应用需要数据库连接信息，你创建 ConfigMap 和 Secret，并在 Deployment 中引用它们，注入到 Pod 的环境变量中。
+
+应用需要持久化数据，你创建 PVC，在 Deployment 中挂载，系统根据 StorageClass 动态创建 PV 与之绑定。

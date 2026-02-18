@@ -1,0 +1,182 @@
+Docker作为容器化技术的代表，是开发和运维领域的基础工具。以下内容围绕“Docker是什么、为什么用、怎么用”三个核心问题展开，并整理了关键命令和操作示例，方便你筛选用于PPT制作。
+
+一、 Docker基本概念
+1.1 什么是Docker？
+Docker是一个开源的应用容器引擎，它允许开发者将应用及其依赖环境打包到一个轻量级、可移植的容器中，然后发布到任何流行的Linux或Windows机器上。它利用Linux内核的命名空间（Namespaces）和控制组（Cgroups）来实现资源隔离与限制。
+
+1.2 核心价值
+环境一致性：开发、测试、生产环境无缝衔接，解决“在我电脑上能跑”的问题。
+
+轻量高效：容器共享宿主机内核，无需像虚拟机一样模拟整个操作系统，启动秒级，资源利用率高。
+
+可移植性：一次构建，随处运行。
+
+1.3 三大核心组件
+为了更好地理解Docker，需要掌握以下三个核心概念，它们之间的关系可以用面向对象编程来类比：
+
+概念	通俗解释	类比（面向对象）
+镜像	一个只读的模板，包含了运行应用所需的代码、运行时、库、环境变量和配置文件。	类
+容器	镜像的运行实例。它是一个可运行的、隔离的进程。可以被启动、停止、删除。	对象（实例）
+仓库	集中存放镜像文件的地方，最常用的是Docker Hub（官方仓库）。	代码仓库（如GitHub）
+二、 Docker安装与配置
+2.1 安装
+Docker支持主流操作系统，包括Linux（如Ubuntu, CentOS）、Windows和macOS。
+
+Linux (Ubuntu)：···
+
+bash
+# 更新软件包索引
+sudo apt-get update
+
+# 安装Docker CE（社区版）
+sudo apt-get install docker-ce docker-ce-cli containerd.io
+
+# 启动Docker服务并设置开机自启
+sudo systemctl start docker
+sudo systemctl enable docker
+
+# 验证安装
+sudo docker run hello-world
+
+Windows/macOS：建议下载并安装 Docker Desktop，它提供了图形化界面和原生的运行环境（Windows依赖WSL2）。
+
+2.2 配置镜像加速
+由于网络原因，从Docker Hub拉取镜像可能较慢，建议配置国内云服务商的镜像加速器（如阿里云、华为云）。
+
+json
+# 编辑或创建 /etc/docker/daemon.json 文件
+{
+  "registry-mirrors": ["https://<你的加速器地址>.mirror.aliyuncs.com"]
+}
+
+# 重启Docker使配置生效
+sudo systemctl restart docker
+
+三、 核心操作命令
+3.1 镜像管理
+拉取镜像：docker pull <镜像名>:<标签> (标签如：latest, alpine)
+
+bash
+docker pull nginx:alpine
+
+查看本地镜像：docker images
+
+删除镜像：docker rmi <镜像ID或名称>
+
+3.2 容器生命周期
+运行容器：
+
+bash
+# 示例：后台运行nginx容器，命名并映射端口
+docker run -d --name my-nginx -p 8080:80 nginx:alpine
+参数说明：-d 后台运行，--name 命名，-p 宿主机端口:容器端口
+
+查看容器：docker ps (查看运行中)，docker ps -a (查看所有，包括已停止)
+
+停止/启动容器：docker stop <容器名> / docker start <容器名>
+
+进入容器内部：
+
+bash
+docker exec -it my-nginx sh
+参数说明：-it 交互模式，sh 是启动的shell（Alpine镜像常用sh而非bash）
+
+3.3 数据持久化（卷）
+容器删除后数据会丢失，通过挂载（Volume）可以将数据持久化到宿主机。
+
+命令：docker run -v /宿主机/路径:/容器/路径 <镜像>
+
+bash
+docker run -v /data/nginx/html:/usr/share/nginx/html nginx
+四、 构建自定义镜像：Dockerfile
+通过编写Dockerfile文件，可以自动化构建自定义镜像。
+
+场景：假设你需要一个显示“Hello Docker”的简单Nginx镜像。
+
+创建项目目录：
+
+bash
+mkdir myweb && cd myweb
+创建index.html：
+
+html
+<h1>Hello Docker for PPT!</h1>
+创建Dockerfile（文件名必须一致，无后缀）：
+
+dockerfile
+# 指定基础镜像
+FROM nginx:alpine
+
+# 将当前目录下的index.html复制到容器内的网站根目录
+COPY index.html /usr/share/nginx/html/index.html
+
+# 暴露80端口
+EXPOSE 80
+
+构建镜像：
+
+bash
+# -t 指定镜像名和标签，最后的 . 表示使用当前目录的Dockerfile
+docker build -t hello-nginx:v1 .
+
+运行测试：
+
+bash
+docker run -d -p 8080:80 hello-nginx:v1
+打开浏览器访问 http://localhost:8080 即可看到页面。
+
+五、 多容器编排：Docker Compose
+当应用较复杂（如Web应用+数据库），需要管理多个容器时，可以使用Docker Compose。
+
+示例：部署WordPress（包含WordPress和MySQL两个服务）。
+
+创建docker-compose.yml文件：
+
+yaml
+version: '3.8'  # 指定 compose 文件版本
+
+services:
+  db:  # 数据库服务
+    image: mysql:8.0
+    volumes:
+      - db_data:/var/lib/mysql  # 数据持久化
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: wordpress
+
+  wordpress:  # WordPress服务
+    image: wordpress:latest
+    ports:
+      - "8080:80"  # 端口映射
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_PASSWORD: example
+    depends_on:
+      - db  # 依赖于db服务
+
+volumes:
+  db_data:  # 声明数据卷
+启动应用：
+
+bash
+docker compose up -d
+
+停止并清理：
+
+bash
+docker compose down
+总结
+本PPT内容可以按照以下逻辑组织：
+
+痛点：应用部署环境不一致、配置繁琐。
+
+解决方案：Docker容器化技术。
+
+核心概念图：镜像、容器、仓库的关系（类与对象的类比很适合PPT展示）。
+
+快速上手：一条docker run命令跑起来（看到成果）。
+
+进阶：通过Dockerfile构建自己的镜像，通过docker-compose.yml编排多容器项目。
+
+总结：Docker是云原生时代的基石，也是开发人员必备技能。
+
