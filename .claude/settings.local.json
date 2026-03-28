@@ -12,7 +12,15 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git branch:*)",
-      "Bash(ln:*)"
+      "Bash(ln:*)",
+      "mcp__web-reader__webReader",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm dev:*)",
+      "Bash(npx slidev:*)",
+      "Bash(curl:*)",
+      "Bash(BROWSER=none npx slidev --port 3030 --remote 2>&1)",
+      "WebSearch",
+      "Bash(du:*)"
     ]
   }
 }

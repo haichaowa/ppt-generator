@@ -37,8 +37,11 @@ env/
 .DS_Store
 Thumbs.db
 
+# Node
+node_modules/
+.output/
+.slidev/
+
 # Test/generated files (keep the skill source, ignore test outputs)
 test.html
 test.md
-
-# Keep k8s.md and k8s.html as examples

@@ -1,0 +1,16 @@
+{
+  "name": "k8s-presentation",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "slidev build",
+    "dev": "slidev --open --remote",
+    "export": "slidev export --with-clicks --per-slide --wait-until none"
+  },
+  "dependencies": {
+    "@slidev/cli": "^51.5.1",
+    "@slidev/types": "^51.5.1",
+    "seedrandom": "^3.0.5"
+  },
+  "devDependencies": {}
+}
