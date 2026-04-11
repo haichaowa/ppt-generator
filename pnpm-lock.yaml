@@ -120,6 +120,42 @@ importers:
         specifier: ^1.0.13
         version: 1.0.18
 
+  artifact/2026-04-01-react-tic-tac-toe:
+    devDependencies:
+      '@iconify-json/devicon':
+        specifier: ^1.2.45
+        version: 1.2.61
+      '@iconify-json/logos':
+        specifier: ^1.2.9
+        version: 1.2.10
+      '@iconify-json/simple-icons':
+        specifier: ^1.2.55
+        version: 1.2.75
+
+  artifact/2026-04-04-langchain-tools:
+    devDependencies:
+      '@iconify-json/devicon':
+        specifier: ^1.2.45
+        version: 1.2.61
+      '@iconify-json/logos':
+        specifier: ^1.2.9
+        version: 1.2.10
+      '@iconify-json/simple-icons':
+        specifier: ^1.2.55
+        version: 1.2.75
+
+  artifact/2026-04-05-langchain-short-term-memory:
+    devDependencies:
+      '@iconify-json/devicon':
+        specifier: ^1.2.45
+        version: 1.2.61
+      '@iconify-json/logos':
+        specifier: ^1.2.9
+        version: 1.2.10
+      '@iconify-json/simple-icons':
+        specifier: ^1.2.55
+        version: 1.2.75
+
   artifact/k8s-presentation:
     dependencies:
       '@slidev/cli':
