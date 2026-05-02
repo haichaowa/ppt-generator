@@ -23,7 +23,11 @@
       "Bash(du:*)",
       "mcp__web-search-prime__web_search_prime",
       "Bash(find /Users/wanghaichao/develop/VsCodeProject/ppt-generator/assets -type f -name *.json -o -name *.ts -o -name *.css -o -name *.vue)",
-      "Bash(pnpm run:*)"
+      "Bash(pnpm run:*)",
+      "Bash(file *)",
+      "Read(//tmp/**)",
+      "Bash(gh --version)",
+      "Bash(gh api:*)"
     ]
   }
 }

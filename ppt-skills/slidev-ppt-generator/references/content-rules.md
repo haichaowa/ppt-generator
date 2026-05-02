@@ -55,13 +55,23 @@
 | 演讲标题 + 副标题 | `center` | `layout: center` |
 | 章节分隔/编号切换 | `section` | `layout: section` |
 | 观点 + 3-5 论据 | `default` | （默认布局） |
-| 对比/优缺点分析 | `two-cols` | `layout: two-cols` + `::right::` |
+| 对比/优缺点分析 | `two-cols` 或 `comparison` | `layout: two-cols` + `::right::` / 自定义卡片 |
 | 带标题的对比 | `two-cols-header` | `layout: two-cols-header` + `::left::`+`::right::` |
 | 图片+文字说明 | `image-left/right` | `layout: image-left` + `image: 路径` |
 | 全屏图片 | `image` | `layout: image` + `image: 路径` |
 | 代码演示 | `default` | 代码块 + 行高亮 |
+| 代码逐段讲解 | `code-focus` | 左代码 + 右注释栏 |
+| 特性/功能列举 | `card-grid` | UnoCSS grid + 卡片组件 |
+| 多步骤流程/管道 | `steps-pipeline` | 水平步骤卡片 + 箭头 |
+| 新旧方案/技术选型 | `comparison` | 双栏卡片 + 代码块 |
+| 技术演进/版本迭代 | `timeline` | 纵向时间线 + 圆点 |
+| 系统架构/分层 | `architecture` | 分层卡片 + 层间箭头 |
+| 关键指标/数据 | `metrics` | 大数字 + 说明文字 |
+| Benchmark/参数对比 | `data-table` | Markdown 表格 |
+| 问答/互动环节 | `faq` | Q/A 卡片逐个展开 |
+| API 参数/配置详解 | `annotated-list` | 左参数名 + 右说明 |
 | 名言金句 | `quote` | `layout: quote` |
-| 关键数据展示 | `fact` | `layout: fact` |
+| 关键数据展示（单个） | `fact` | `layout: fact` |
 | 核心结论陈述 | `center` 或 `statement` | `layout: statement` |
 | 演讲者介绍 | `intro` | `layout: intro` |
 | 结束致谢 | `end` | `layout: end` |
