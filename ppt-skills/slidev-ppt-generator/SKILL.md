@@ -11,17 +11,42 @@ description: 从用户需求生成专业的Slidev演示文稿，使用Markdown�
 
 技术分享、会议演讲、代码演示、教程培训、产品介绍、项目汇报
 
-## 五步工作流程
+## 内容管道
 
-### 步骤 1：需求收集
+```
+contents/ori/ (原始材料) → [可选联网补充] → contents/generate/ (结构化内容) → artifact/ (演示文稿)
+```
+
+- **ori/**：用户提供的原始材料（文件、URL、粘贴内容），每个主题一个目录
+- **generate/**：经过结构化处理的中间产物（metadata.json + outline.md + content.md）
+- **artifact/**：最终生成的 Slidev 演示文稿项目
+
+## 六步工作流程
+
+### 步骤 1：需求收集 + 内容摄取
 
 向用户询问关键信息：主题、受众、时长、风格、特殊需求（代码演示、图表、动画等）
 
+同时检查 `contents/ori/` 是否已有相关材料：
+- 如果用户提供了新材料（文件/URL/目录/粘贴内容），保存到 `contents/ori/{topic-slug}/main.md`
+- 如果 `ori/` 已有材料，直接读取
+- 可选：使用 MCP 联网工具搜索补充材料
+
+**topic-slug 命名规范**：小写英文，连字符分隔，如 `claude-code-best-practices`、`k8s-intro`
+
 ### 步骤 2：内容结构化
 
-按照 `references/content-rules.md` 规则组织内容。核心原则：一页一观点、金字塔原则、少即是多（每页不超过 50 字）
+读取 `contents/ori/{slug}/main.md`，按照 `references/content-rules.md` 规则组织内容。
 
-| 演讲时长 | 推荐页数 | 
+产出三个文件到 `contents/generate/{slug}/`：
+
+1. **metadata.json** — 生成参数（受众、时长、目标页数、主题选择、section 列表）
+2. **outline.md** — 幻灯片结构大纲（每页标题、布局类型、核心要点）
+3. **content.md** — 完整内容，使用注释标记 slide 元数据：`<!-- slide: type | layout: xxx | glowSeed: n -->`
+
+核心原则：一页一观点、金字塔原则、少即是多（每页不超过 50 字）
+
+| 演讲时长 | 推荐页数 |
 |---------|---------|
 | 5-10 分钟 | 8-12 页 |
 | 10-20 分钟 | 12-20 页 |
@@ -29,16 +54,45 @@ description: 从用户需求生成专业的Slidev演示文稿，使用Markdown�
 
 ### 步骤 3：布局映射
 
-根据内容特征选择合适的布局（见下方映射表）
+根据内容特征选择合适的布局（见下方映射表）。
+
+读取主题专属的模式参考：
+- Glow 主题：`references/themes/glow/slide-patterns.md`
+- 通用布局：`references/shared/layout-reference.md`
+- 主题配置：`references/themes/glow/theme-config.md`
 
 ### 步骤 4：生成项目
 
-1. 按照 Slidev 语法生成 `slides.md` 文件，**必须使用 Glow 主题**
-2. **项目目录命名规则**：`artifact/{YYYY-MM-DD}-{主题名称}/`，例如 `artifact/2026-03-28-docker-slides/`
+1. 读取 `contents/generate/{slug}/content.md` 作为输入
+2. 读取主题配置 `references/themes/{theme}/theme-config.md`
+3. 按照 Slidev 语法生成 `slides.md` 文件，**必须使用 Glow 主题**
+4. 复制 `assets/templates/default/` 模板文件，叠加 `assets/themes/glow/` 主题文件
+5. **项目目录命名规则**：`artifact/{YYYY-MM-DD}-{主题名称}/`，例如 `artifact/2026-03-28-docker-slides/`
 
 ### 步骤 5：验证输出
 
-检查 headmatter 配置、布局匹配、代码高亮、动画效果、演讲者注释
+三级验证，确保生成质量：
+
+**Level 1：生成前检查（对 content.md）**
+- 页面数量与 metadata.json 目标一致
+- 每页有布局标记
+- 代码块有语言标识
+- 每页文字量 ≤ 50 字
+
+**Level 2：生成后语法检查（对 slides.md）**
+- 无裸属性中的 `/`（必须 `class="..."`）
+- 所有代码块有语言标识
+- frontmatter `---` 配对正确
+- `v-click` 数量与 `clicks:` 值匹配
+- 超过 15 行的代码块有 `maxHeight`
+- 无空幻灯片（frontmatter 后无内容）
+- 必需 headmatter 键齐全（layout, highlighter, css, colorSchema, glowSeed）
+
+**Level 3：Build 验证（最终）**
+```bash
+cd artifact/{YYYY-MM-DD}-{slug}/ && pnpm run build
+```
+成功 = 结构正确；失败 = 根据错误对照"常见错误"章节修复
 
 ## 内容-布局映射表
 
@@ -76,7 +130,7 @@ description: 从用户需求生成专业的Slidev演示文稿，使用Markdown�
 | 问答互动 | `faq` | Q/A 卡片逐个展开 |
 | 参数/配置详解 | `annotated-list` | 左参数名 + 右说明 |
 
-完整模板见 [布局模式](references/slide-patterns.md)
+完整模板见 [Glow 布局模式](references/themes/glow/slide-patterns.md) 和 [Slidev 布局参考](references/shared/layout-reference.md)
 
 ## Headmatter 配置
 
@@ -1017,8 +1071,11 @@ pnpm run export       # 导出 PDF
 ## 参考文档
 
 - [内容规则](references/content-rules.md) — 核心原则、页面数量、内容→布局映射、检查清单
-- [布局模式](references/slide-patterns.md) — 每种布局完整模板、headmatter 参考、组件速查
-- [完整示例](references/example-slides.md) — 可运行的 slides.md
+- [Glow 布局模式](references/themes/glow/slide-patterns.md) — Glow 主题高级组合布局模板
+- [Glow 完整示例](references/themes/glow/example-slides.md) — 可运行的 Glow 主题 slides.md
+- [Glow 主题配置](references/themes/glow/theme-config.md) — Glow 专属配置和设计约束
+- [Slidev 布局参考](references/shared/layout-reference.md) — 内置布局模板和 headmatter 配置
+- [组件参考](references/shared/component-reference.md) — v-click、Link、Toc 等组件用法
 
 ## 使用示例
 

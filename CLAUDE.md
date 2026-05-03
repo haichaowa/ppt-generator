@@ -24,23 +24,38 @@ cd artifact/{topic}/ && pnpm run export                # slidev export --with-cl
 
 ```
 ppt-generator/
-├── artifact/              # 每个 artifact 是独立的 Slidev 演示项目
+├── contents/                  # 内容管道
+│   ├── ori/                   # 原始材料（用户提供的源文件）
+│   │   └── {topic-slug}/      # 每个主题一个目录
+│   │       ├── README.md      # 主题元数据
+│   │       ├── main.md        # 主要原始内容
+│   │       └── assets/        # 可选附件
+│   └── generate/              # 结构化中间产物
+│       └── {topic-slug}/
+│           ├── metadata.json  # 生成参数（时长、受众、主题）
+│           ├── outline.md     # 幻灯片结构大纲
+│           └── content.md     # 完整结构化内容
+├── artifact/                  # 每个 artifact 是独立的 Slidev 演示项目
 │   └── {date}-{topic}/
-│       ├── slides.md      # 主文件（幻灯片内容，Markdown + Vue）
-│       ├── uno.config.ts  # UnoCSS 配置（继承 @slidev/client 基础配置）
-│       ├── style.css      # 自定义样式
+│       ├── slides.md          # 主文件（幻灯片内容，Markdown + Vue）
+│       ├── uno.config.ts      # UnoCSS 配置（继承 @slidev/client 基础配置）
+│       ├── style.css          # 自定义样式
 │       ├── global-bottom.vue  # Glow 主题组件
-│       └── public/        # 静态资源（图片、视频等）
+│       └── public/            # 静态资源（图片、视频等）
 ├── ppt-skills/slidev-ppt-generator/
-│   ├── SKILL.md           # 生成器核心：5步工作流 + 布局映射 + 设计规范
-│   ├── references/        # 内容规则、布局模板、示例幻灯片
+│   ├── SKILL.md               # 生成器核心：6步工作流 + 布局映射 + 设计规范
+│   ├── references/            # 参考文档
+│   │   ├── content-rules.md   # 通用内容组织规则
+│   │   ├── themes/glow/       # Glow 主题专属（slide-patterns、example-slides、theme-config）
+│   │   └── shared/            # 通用参考（layout-reference、component-reference）
 │   └── assets/
 │       ├── templates/default/  # 默认模板（package.json、uno.config、style.css、shiki setup）
 │       └── themes/glow/        # Glow 主题覆写（global-bottom.vue、uno.config、style.css）
-└── package.json           # Monorepo 根配置，管理所有共享依赖
+└── package.json               # Monorepo 根配置，管理所有共享依赖
 ```
 
-**生成流程**：SKILL.md（5步工作流）→ 复制 default 模板 → 叠加 glow 主题 → 生成 slides.md → `pnpm run dev` 验证
+**内容管道**：`ori/` (原始材料) → `generate/` (结构化内容) → `artifact/` (演示文稿)
+**生成流程**：SKILL.md（6步工作流）→ 复制 default 模板 → 叠加 glow 主题 → 生成 slides.md → build 验证
 
 ## 技术栈
 
