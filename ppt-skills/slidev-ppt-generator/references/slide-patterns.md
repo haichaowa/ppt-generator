@@ -183,6 +183,15 @@ class: text-white
 ---
 ```
 
+### iframe — 嵌入网页
+
+```markdown
+---
+layout: iframe
+url: https://example.com
+---
+```
+
 ### quote — 引用
 
 ```markdown

@@ -59,6 +59,7 @@
 | 带标题的对比 | `two-cols-header` | `layout: two-cols-header` + `::left::`+`::right::` |
 | 图片+文字说明 | `image-left/right` | `layout: image-left` + `image: 路径` |
 | 全屏图片 | `image` | `layout: image` + `image: 路径` |
+| 嵌入网页演示 | `iframe` | `layout: iframe` + `url: 网址` |
 | 代码演示 | `default` | 代码块 + 行高亮 |
 | 代码逐段讲解 | `code-focus` | 左代码 + 右注释栏 |
 | 特性/功能列举 | `card-grid` | UnoCSS grid + 卡片组件 |

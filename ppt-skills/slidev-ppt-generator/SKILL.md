@@ -42,20 +42,41 @@ description: 从用户需求生成专业的Slidev演示文稿，使用Markdown�
 
 ## 内容-布局映射表
 
+### Slidev 内置布局
+
 | 内容特征 | 推荐布局 | 判断依据 |
 |---------|---------|---------|
 | 封面标题 | `center` | 演示开头，主标题 + 副标题 |
 | 居中强调 | `center` | 核心观点、关键信息 |
 | 标准内容 | `default` | 标题 + 列表，最常用 |
+| 章节分隔 | `section` | 主题切换、段落过渡 |
 | 双栏对比 | `two-cols` | 左右对比、优缺点分析 |
+| 带标题双栏 | `two-cols-header` | 有统一标题的左右对比 |
 | 图文混排 | `image-left` / `image-right` | 配图说明 |
 | 全屏图片 | `image` | 视觉冲击力强的图片 |
-| 章节分隔 | `section` | 主题切换、段落过渡 |
 | 引言引用 | `quote` | 名人名言、核心理念 |
-| 数据展示 | `fact` | 关键数据、统计结果 |
-| 嵌入网页 | `iframe` | 在线演示、外部链接 |
+| 数据展示（单个） | `fact` | 关键数据、统计结果 |
+| 核心陈述 | `statement` | 核心结论、一句话总结 |
 | 介绍页 | `intro` | 演讲者介绍、背景说明 |
 | 结束页 | `end` | 致谢、联系方式 |
+| 嵌入网页 | `iframe` | 在线演示、外部链接 |
+
+### 高级组合布局（default + UnoCSS + Vue）
+
+| 内容特征 | 推荐布局 | 实现方式 |
+|---------|---------|---------|
+| 特性/功能列举 | `card-grid` | UnoCSS grid + 卡片组件 |
+| 多步骤流程 | `steps-pipeline` | 水平步骤卡片 + 箭头 |
+| 代码逐段讲解 | `code-focus` | 左代码 + 右注释栏 |
+| 新旧方案对比 | `comparison` | 双栏卡片 + 代码块 |
+| 技术演进 | `timeline` | 纵向时间线 + 圆点 |
+| 系统架构 | `architecture` | 分层卡片 + 层间箭头 |
+| 关键指标 | `metrics` | 大数字 + 说明文字 |
+| 参数对比 | `data-table` | Markdown 表格 |
+| 问答互动 | `faq` | Q/A 卡片逐个展开 |
+| 参数/配置详解 | `annotated-list` | 左参数名 + 右说明 |
+
+完整模板见 [布局模式](references/slide-patterns.md)
 
 ## Headmatter 配置
 
