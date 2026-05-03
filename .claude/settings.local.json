@@ -27,7 +27,10 @@
       "Bash(file *)",
       "Read(//tmp/**)",
       "Bash(gh --version)",
-      "Bash(gh api:*)"
+      "Bash(gh api:*)",
+      "Bash(pkill -f \"slidev\")",
+      "Bash(lsof -nP -iTCP:3030)",
+      "Bash(xxd)"
     ]
   }
 }

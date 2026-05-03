@@ -7,7 +7,8 @@
   "description": "Slidev PPT Generator - Monorepo",
   "scripts": {
     "cleanup:dist": "rimraf --glob dist",
-    "packages:build": "pnpm cleanup:dist && pnpm -r --filter=./artifact/* run build"
+    "packages:build": "pnpm cleanup:dist && pnpm -r --filter=./artifact/* run build",
+    "packages:export": "pnpm -r --filter=./artifact/* run export"
   },
   "devDependencies": {
     "@iconify-json/carbon": "^1.2.14",

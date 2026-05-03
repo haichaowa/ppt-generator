@@ -156,6 +156,42 @@ importers:
         specifier: ^1.2.55
         version: 1.2.75
 
+  artifact/2026-05-02-pytorch-syntax:
+    devDependencies:
+      '@iconify-json/devicon':
+        specifier: ^1.2.45
+        version: 1.2.61
+      '@iconify-json/logos':
+        specifier: ^1.2.9
+        version: 1.2.10
+      '@iconify-json/simple-icons':
+        specifier: ^1.2.55
+        version: 1.2.75
+      '@iconify/utils':
+        specifier: ^3.0.2
+        version: 3.1.0
+      '@proj-airi/lobe-icons':
+        specifier: ^1.0.13
+        version: 1.0.18
+
+  artifact/2026-05-03-claude-code-best-practices:
+    devDependencies:
+      '@iconify-json/devicon':
+        specifier: ^1.2.45
+        version: 1.2.61
+      '@iconify-json/logos':
+        specifier: ^1.2.9
+        version: 1.2.10
+      '@iconify-json/simple-icons':
+        specifier: ^1.2.55
+        version: 1.2.75
+      '@iconify/utils':
+        specifier: ^3.0.2
+        version: 3.1.0
+      '@proj-airi/lobe-icons':
+        specifier: ^1.0.13
+        version: 1.0.18
+
   artifact/k8s-presentation:
     dependencies:
       '@slidev/cli':

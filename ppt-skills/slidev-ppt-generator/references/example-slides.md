@@ -336,7 +336,3 @@ glowSeed: 600
   联系方式 · GitHub · Email
 </div>
 ```
-```
-[WARNING] Scoping issue: the code fence was never closed. The code block that starts at line 7 continues until the end of the file without a closing fence (```). This is likely caused by incorrect nesting of code fences - see how they should be nested at https://mdc pursuit.com/syntax/#code-fence-within-code-block. If you do not wish this to be a code fence, you can escape it: \`\`\`.
-
-The user will not see this warning.

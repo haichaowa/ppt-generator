@@ -23,14 +23,15 @@ export default mergeConfigs([
         },
       }),
       presetWebFonts({
+        provider: 'bunny',
         fonts: {
           sans: 'DM Sans',
           cn: 'Noto Serif SC',
           hand: 'Playwrite IT Moderna',
         },
         timeouts: {
-          failure: 30000,
-          warning: 30000,
+          failure: 60000,
+          warning: 60000,
         },
       }),
     ],
