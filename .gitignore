@@ -45,3 +45,6 @@ node_modules/
 # Test/generated files (keep the skill source, ignore test outputs)
 test.html
 test.md
+
+# OMC runtime state
+.omc/

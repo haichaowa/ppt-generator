@@ -95,7 +95,3 @@ ppt-generator/
 ### Git Commit 规范
 
 格式：`<type>: <中文描述>`，type 包括 feature/bugfix/refactor/docs/style/perf/test/chore/ci。详见 `.claude/commit-convention.md`。
-
-## 表情包资源
-
-- 表情包目录：`/Users/wanghaichao/develop/VsCodeProject/ChineseBQB-master`

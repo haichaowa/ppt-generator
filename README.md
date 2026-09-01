@@ -1,82 +1,37 @@
 # PPT Generator
 
-基于 [Slidev](https://sli.dev/) 的演示文稿生成器，使用 Markdown + Vue 3 + UnoCSS 编写幻灯片，支持 Glow 发光主题、代码高亮、动画效果。
+基于 [Slidev](https://sli.dev/) 的演示文稿生成器工作区。核心是 `ppt-skills/slidev-ppt-generator/` 中的生成器 Skill（工作流 + 布局模式 + 踩坑记录），配合 pnpm workspace 管理。
 
-## 快速开始
-
-### 环境要求
-
-- Node.js >= 18
-- pnpm（`npm install -g pnpm`）
-
-### 安装依赖
-
-```bash
-# 在项目根目录安装共享依赖
-pnpm install
-```
-
-### 运行一个 PPT
-
-```bash
-# 进入某个演示文稿目录
-    cd artifact/2026-03-28-airi-intro
-
-# 启动开发服务器（自动打开浏览器）
-pnpm run dev
-```
-
-启动后浏览器会自动打开 `http://localhost:3030`，修改 `slides.md` 保存后页面自动热更新。
-
-### 导出 PDF
-
-```bash
-cd artifact/2026-03-28-airi-intro
-pnpm run export
-```
-
-导出的 PDF 文件会生成在当前目录下。
-
-### 构建为静态站点
-
-```bash
-cd artifact/2026-03-28-airi-intro
-pnpm run build
-```
-
-构建产物输出到 `dist/` 目录，可直接部署到任意静态托管服务。
+> 2026-09 起重构中：旧演示文稿和素材已清理（可在 git 历史中找回），保留 Skill 知识资产作为新项目的起点。
 
 ## 项目结构
 
 ```
 ppt-generator/
-├── artifact/                    # 生成的演示文稿（每个子目录是一个独立的 Slidev 项目）
-│   ├── 2026-03-28-airi-intro/
-│   │   ├── slides.md            # 幻灯片内容（主文件）
-│   │   ├── package.json         # 项目配置（dev/build/export 脚本）
-│   │   ├── uno.config.ts        # UnoCSS 配置
-│   │   ├── style.css            # 自定义样式
-│   │   ├── global-bottom.vue    # Glow 主题背景组件
-│   │   ├── public/              # 图片、视频等静态资源
-│   │   └── setup/               # Shiki 代码高亮等配置
-│   └── ...
-├── ppt-skills/slidev-ppt-generator/   # PPT 生成器 Skill 定义
-│   ├── SKILL.md                 # 核心生成逻辑和规范
-│   └── references/              # 内容规则、布局模板、示例
-├── package.json                 # Monorepo 根配置
+├── ppt-skills/slidev-ppt-generator/   # 生成器 Skill
+│   ├── SKILL.md                       # 6 步工作流 + 视觉设计模式 + 常见错误
+│   ├── references/                    # 内容规则、Glow 布局模式、布局/组件参考
+│   └── assets/                        # default 模板 + Glow 主题文件
+├── contents/                          # 内容管道（生成时按需创建）
+│   ├── ori/                           # 原始材料 → 结构化 → artifact/
+│   └── generate/
+├── artifact/                          # 生成的演示文稿（生成时按需创建）
+├── package.json                       # Monorepo 根配置（共享依赖）
 └── pnpm-workspace.yaml
 ```
 
-## 可用的演示文稿
+## 使用
 
-| 目录 | 主题 |
-|------|------|
-| `artifact/2026-03-28-airi-intro` | Airi 项目介绍 |
-| `artifact/2026-03-28-mcp-intro` | MCP 协议介绍 |
-| `artifact/2026-04-01-react-tic-tac-toe` | React 井字棋教程 |
-| `artifact/2026-04-04-langchain-tools` | LangChain Tools 讲解 |
-| `artifact/2026-04-05-langchain-short-term-memory` | LangChain 短期记忆机制 |
-| `artifact/k8s-presentation` | Kubernetes 演讲 |
+```bash
+pnpm install                          # 安装共享依赖
+
+# 生成新演示：按 ppt-skills/slidev-ppt-generator/SKILL.md 的工作流执行，
+# 产物放在 artifact/{YYYY-MM-DD}-{topic}/
+
+cd artifact/{topic} && pnpm run dev   # 启动开发服务器
+cd artifact/{topic} && pnpm run build # 构建静态站点 → dist/
+cd artifact/{topic} && pnpm run export # 导出 PDF
+```
 
 ## 技术栈
 
