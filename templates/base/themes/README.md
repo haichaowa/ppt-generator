@@ -12,6 +12,7 @@
 | `--accent` / `--accent-2` | 主强调色 / 次强调色 |
 | `--font-display` / `--font-body` / `--font-mono` | 标题 / 正文 / 代码字体栈 |
 | `--line-height-title` / `--line-height-body` | 显式行高（**跨平台中文防溢出的关键**，必须显式声明） |
+| `--card-bg` / `--card-border` / `--card-radius` / `--card-blur` | 卡片视觉（底色/边框/圆角/毛玻璃）——patterns.css 的 `.pat-card` 消费这组变量 |
 
 ## 主题清单（P0 交付）
 
